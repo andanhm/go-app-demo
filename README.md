@@ -1,2 +1,7 @@
 # go-app-demo
-GoLang tranning section application
+GoLang training section application
+
+```sh
+$ go get golang.org/x/tools/cmd/present
+$ present
+```

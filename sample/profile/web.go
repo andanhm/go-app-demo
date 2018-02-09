@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
 	"sync"
 	"time"
 )
@@ -14,6 +16,24 @@ func main() {
 	go func() {
 		log.Println(http.ListenAndServe("localhost:8080", nil))
 	}()
+	http.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
+		response,err := http.Get("https://jsonplaceholder.typicode.com/users")
+		if err != nil {
+			fmt.Printf("%s", err)
+			os.Exit(1)
+		} else {
+			defer response.Body.Close()
+			contents, err := ioutil.ReadAll(response.Body)
+			if err != nil {
+				fmt.Printf("%s", err)
+				return
+			}
+			fmt.Fprintf(w, string(contents))
+			return
+		}
+		fmt.Fprintf(w, "Error")
+		return		
+	})
 	fmt.Println("hello world")
 	var wg sync.WaitGroup
 	wg.Add(1)

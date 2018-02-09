@@ -164,6 +164,9 @@ A goroutine is a function that is capable of running concurrently with other fun
 - Goroutines come with built-in primitives to communicate safely between themselves (channels).
 - Goroutines allow you to avoid having to resort to mutex locking when sharing data structures.
 
+# only 2kB of stack space Threads on the other hand start out at 1Mb
+# Go runtime manages the goroutines throughout from creation to scheduling to teardown.
+
 * Example
 .play ./sample/routines/hello.go
 
@@ -238,3 +241,12 @@ Delve is a debugger for the Go programming language.
 
 * Questions?
 #.caption _Gopher_ by [[http://www.andanhm.in][Andan H M]]
+
+
+* Resources
+
+[[https://www.goinggo.net/2017/02/package-oriented-design.html][ardanlabs]]
+[[https://awesome-go.com/][awesome-go]]
+[[http://idiomaticgo.com/post/best-practice/server-project-layout/?utm_source=newsletter_mailer&utm_medium=email&utm_campaign=weekly][PROJECT LAYOUT]]
+[[https://rakyll.org/style-packages/][Go style]]
+[[https://jvns.ca/blog/2017/09/24/profiling-go-with-pprof/][Go Profile]]
