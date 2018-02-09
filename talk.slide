@@ -1,0 +1,240 @@
+Hands-on Programming in Go
+
+ 
+* Agenda of day 2 training
+
+- Folder structure/ package
+- Layered architecture for writing code
+- Stateless
+- Best practices
+- Channels
+
+- Go tools 
+    Debugging
+    Profiling
+    Testing
+    Benchmark
+
+- How to write a full fledged app? 
+
+* Folder structure/ Package
+
+* Go programs are made up of packages
+
+All Go source is part of a package.
+Every file begins with a package statement.
+Programs start in package main.
+
+.play ./sample/web/hello.go
+
+For very small programs, main is the only package you need to write.
+
+* Why prescribe file layout?
+
+Using file layout for builds means less configuration. 
+In fact, it means no configuration. 
+No Makefile, no build.xml.
+
+Less time configuring means more time programming.
+
+Everyone in the community uses the same layout. 
+This makes it easier to share code.
+
+#The Go tool helps build the Go community.
+
+* Our workspace
+
+	$GOPATH/
+		bin/                                    # installed binary
+		pkg/darwin_amd64/                       # compiled archives
+		src/                                    # source repositories			
+			stash.bms.bz/bms...                       # git repo    				    
+
+
+* Coding conventions
+---
+*Naming*
+*Linting*
+*Best* *practices*
+*Project* *Structure*
+*Documentation* 
+
+* Naming 
+    - Keep package names short and meaningful.
+    - Package names are usually one lowercase word.
+    - Don't use underscores, they make package names long.
+    - Use `camelCase`, `not_underscores`.
+    - Local variable names should be short, typically one or two characters.
+    - Global variables should have longer names.
+
+Don't stutter.
+
+- `bytes.Buffer` not `bytes.ByteBuffer`
+- `zip.Reader` not `zip.ZipReader`
+- `errors.New` not `errors.NewError`
+- `r` not `bytesReader`
+- `i` not `loopIterator`
+
+* Linting:  We recommend using govet before committing. 
+
+- Simplified dead code detector. Used for skipping certain checks on unreachable code (for instance, shift checks on arch-specific code).
+
+[[https://golang.org/cmd/vet/][go vet]]
+# go vet only works with a single package and cannot take flag options (to enable only specific checks).
+[[https://golang.org/cmd/vet/][go tool vet]]
+# go tool vet is much more complete, it works with files and directories.
+# Directories are recursively explored to find packages. go tool vet also handles options to enable each check by category.
+.play ./sample/vetlint/vet.go
+#command go tool vet 
+
+* Best practices, Gotchas and Pitfalls
+
+- You should handle error first to avoid nesting.
+- Avoid very long files.
+- Make your package go get-able
+- Important code should always go first.
+- Try to use OOPs concept of composition.
+- Write benchmark for all APIs using testing pkg.
+- Your functions should be small, concise and cohesive. Divide a function if it's large and handle multiple responsibility.
+- Domain-driven design (DDD)
+
+
+* Project Structure
+
+
+$GOPATH/
+
+    src/stash.bms.bz/
+        bms/
+            iam/                       
+                api/                    # package http handlers/ routes
+                cmd/                    # package main
+                config/                 # package app configs
+                global/                 # package app global initializations                         
+                pkg/                    # Packages that need to be imported by multiple programs.
+                    platform/           # package platform like database, cache
+                        cache/
+                            redis/...
+                            memcache/..
+                        database
+                            mysql/...
+                .git
+                        
+* Documentation convention
+    - Write the name of package, types, variable, function before proceeding with documentation.
+    - There should be no blank line proceeding the declaration.
+    - Comment should be the complete the sentence.
+    - Use godoc to generate documentation.
+
+Doc comments precede the declaration of an exported identifier:
+
+        // Join concatenates the elements of elem to create a single string.
+        // The separator string sep is placed between elements in the resulting string.
+        func Join(elem []string, sep string) string {
+
+The godoc tool extracts such comments and presents them on the web:
+
+Example
+
+.link https://github.com/andanhm/go-prettytime Source Code
+.link https://godoc.org/github.com/andanhm/go-prettytime Documentation
+
+: godoc fmt Printf
+
+
+* Dependency management
+
+`go` `get` always fetches the latest code
+
+Technique: vendoring.
+
+Versioning
+
+.link https://github.com/golang/dep dep
+dep is a prototype dependency management tool for Go. It requires Go 1.8 or newer to compile. dep is safe for production use.
+
+.link https://github.com/FiloSottile/gvt gvt
+gvt is the go vendoring tool for the GO15VENDOREXPERIMENT, based on gb-vendor
+
+* Goroutines
+A goroutine is a function that is capable of running concurrently with other functions.
+.image ./image/go_routines.jpeg 250 350
+
+- Goroutines have growable segmented stacks, faster startup time than threads.
+- Goroutines come with built-in primitives to communicate safely between themselves (channels).
+- Goroutines allow you to avoid having to resort to mutex locking when sharing data structures.
+
+* Example
+.play ./sample/routines/hello.go
+
+* Channels
+Channels provide a way for two goroutines to communicate with one another and synchronize their execution.
+
+.image ./image/gophermegaphones.jpeg 300 600
+
+*Select*
+
+Go’s select lets you wait on multiple channel operations. 
+Combining goroutines and channels with select is a powerful feature of Go.
+
+* Example
+#.play ./sample/routines/channel/hello.go /^func main/,/^}/
+.play ./sample/routines/program/channel.go /^func main/,/^}/
+
+
+* Go Tool
+
+
+* Testing
+Go has a built-in testing command called go test and a package testing which combine to give a minimal but complete testing experience.
+
+Characteristics of a Golang test function:
+
+- The first and only parameter needs to be t *testing.T
+- It begins with the word Test followed by a word or phrase starting with a capital letter.
+- (usually the method under test i.e. TestValidateClient)
+- Calls t.Error or t.Fail to indicate a failure (I called t.Errorf to provide more details)
+- t.Log can be used to provide non-failing debug information
+- Must be saved in a file named something_test.go such as: sum_test.go
+
+* Example
+.play ./sample/tools/testing/sum_test.go /^func TestSum/,/^}/
+#go test ./sample/tools/testing/ -cover -run TestSum
+
+* Benchmark
+The Go testing package contains a benchmarking facility that can be used to examine the performance of your Go code.
+- Benchmark functions start with Benchmark not Test.
+- Benchmark functions are run several times by the testing package. 
+    The value of b.N will increase each time until the benchmark runner is satisfied with the stability of the benchmark.
+    This has some important ramifications which we’ll investigate later in this article.
+
+* Example
+.play ./sample/tools/testing/sum_test.go /^func TestSum/,/^}/
+#go test -v -benchmem -run=^$ github.com/andanhm/go-app-demo/sample/tools/benchmark -bench ^BenchmarkSum$
+
+* Profiling
+A Profile is a collection of stack traces showing the call sequences that led to instances of a particular event, such as allocation.
+    
+    Packages can create and maintain their own profiles;
+    the most common use is for tracking resources that must be explicitly closed,
+    such as files or network connections.
+
+Each Profile has a unique name. A few profiles are predefined:
+
+    goroutine    - stack traces of all current goroutines
+    heap         - a sampling of all heap allocations
+    threadcreate - stack traces that led to the creation of new OS threads
+    block        - stack traces that led to blocking on synchronization primitives
+    mutex        - stack traces of holders of contended mutexes
+
+[[https://jvns.ca/blog/2017/09/24/profiling-go-with-pprof/]]
+
+* Debugging
+
+[[https://github.com/derekparker/delve][delve]]
+Delve is a debugger for the Go programming language.
+# https://stackoverflow.com/questions/39058823/how-to-use-delve-debugger-in-visual-studio-code
+
+
+* Questions?
+#.caption _Gopher_ by [[http://www.andanhm.in][Andan H M]]
